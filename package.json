@@ -1,0 +1,24 @@
+{
+  "name": "WebAppWeb",
+  "version": "1.0.0",
+  "description": "A host application framework that acts like a web of micro-front-ends.",
+  "main": "index.js",
+  "author": "Can Nahum",
+  "license": "MIT",
+  "scripts": {
+    "start": "NODE_ENV=production && node index.js",
+    "dev": "NODE_ENV=development && node index.js"
+  },
+  "devDependencies": {
+    "@types/react": "^16.7.10",
+    "@types/react-dom": "^16.0.11",
+    "editorconfig": "^0.15.2",
+    "ts-node": "^7.0.1",
+    "tslint": "^5.11.0",
+    "typescript": "^3.2.1"
+  },
+  "dependencies": {
+    "react": "^16.6.3",
+    "react-dom": "^16.6.3"
+  }
+}
