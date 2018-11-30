@@ -11,5 +11,10 @@
       "jsx-double"
     ]
   },
-  "rulesDirectory": []
+  "rulesDirectory": [],
+  "linterOptions": {
+    "exclude": [
+      "src/**/*.d.ts"
+    ]
+  }
 }
