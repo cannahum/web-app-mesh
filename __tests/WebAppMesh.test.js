@@ -1,6 +1,6 @@
 const { expect } = require('chai');
 
-const { default: WebAppMesh } = require('../src/WebAppMesh');
+const { default: WebAppMesh } = require('../src/WebAppMesh.ts');
 
 
 describe('WebAppMesh Tests', () => {
