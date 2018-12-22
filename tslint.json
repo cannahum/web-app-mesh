@@ -9,6 +9,13 @@
       true,
       "single",
       "jsx-double"
+    ],
+    "object-literal-sort-keys": false,
+    "one-line": [
+      false,
+      "check-catch",
+      "check-finally",
+      "check-else",
     ]
   },
   "rulesDirectory": [],
