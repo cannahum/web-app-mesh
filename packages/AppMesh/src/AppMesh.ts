@@ -5,6 +5,8 @@ import {
   isValidWidgetEntry,
 } from './validators';
 
+import { Logger } from '@web-app-mesh/sandbox';
+
 const SEPARATOR = '!';
 let widgetRegistry: IWidgetRegistry;
 
@@ -15,6 +17,7 @@ export default class AppMesh {
   constructor(requireFunc: (...args: any) => Promise<any>) {
     this.requireFunc = requireFunc;
     widgetRegistry = {};
+    Logger.debug('hey!');
   }
 
   // public get widgetRegistry(): IWidgetRegistry {

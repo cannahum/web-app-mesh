@@ -5,20 +5,16 @@
   "author": "Can Nahum",
   "license": "MIT",
   "scripts": {
-    "build": "tsc -p tsconfig/tsconfig.referenced.json",
-    "build-dev": "tsc --watch --tsconfig=tsconfig/tsconfig.referenced.json",
+    "build": "node_modules/.bin/lerna bootstrap && npm run compile",
+    "build-dev": "node_modules/.bin/lerna bootstrap && npm run compile-dev",
+    "compile": "node_modules/.bin/tsc -b packages/tsconfig/tsconfig.referenced.json",
+    "compile-dev": "node_modules/.bin/tsc -b packages/tsconfig/tsconfig.referenced.json --watch",
     "test": "nyc ./node_modules/.bin/mocha __tests/**/*.test.js"
   },
   "devDependencies": {
-    "@types/chai": "^4.1.7",
-    "@types/mocha": "^5.2.5",
-    "chai": "^4.2.0",
     "editorconfig": "^0.15.2",
-    "mocha": "^5.2.0",
-    "nyc": "^13.1.0",
-    "source-map-support": "^0.5.9",
+    "lerna": "^3.10.5",
     "tslint": "^5.11.0",
     "typescript": "^3.2.1"
-  },
-  "dependencies": {}
+  }
 }
