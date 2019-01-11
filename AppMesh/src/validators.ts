@@ -1,4 +1,4 @@
-import { INotLoadedWidgetEntry, ILoadedWidgetEntry, IWidgetConfig, IWidgetEntry } from '../WebAppMesh';
+import { INotLoadedWidgetEntry, ILoadedWidgetEntry, IWidgetConfig, IWidgetEntry } from './AppMesh';
 
 export function isValidWidgetEntry(x: any): x is IWidgetEntry {
   if (typeof x !== 'object') {

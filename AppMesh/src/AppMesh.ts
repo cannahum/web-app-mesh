@@ -1,17 +1,14 @@
-import React from 'react';
-
-const SEPARATOR = '!';
-
 import {
   isValidNotLoadedWidgetEntry,
   isValidLoadedWidgetEntry,
   isValidWidgetConfig,
   isValidWidgetEntry,
-} from './helpers/validators';
+} from './validators';
 
+const SEPARATOR = '!';
 let widgetRegistry: IWidgetRegistry;
 
-export default class WebAppMesh {
+export default class AppMesh {
 
   private requireFunc: (...args: any) => Promise<any>;
 
@@ -140,7 +137,7 @@ interface ILoadedWidgetAccount extends IWidgetAccount {
   config: IWidgetConfig;
 }
 
-type Widget = (...args: any) => any | React.Component;
+type Widget = (...args: any) => any;
 
 interface IWidgetMetaData {
   wasLoadedInRuntime: boolean;
