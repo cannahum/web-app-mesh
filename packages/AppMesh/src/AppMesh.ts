@@ -1,18 +1,22 @@
 import {
-  isValidNotLoadedWidgetEntry,
+  CompatibilityIssue,
+  getCompatibilityIssuesWithRequestedWidget,
   isValidLoadedWidgetEntry,
+  isValidNotLoadedWidgetEntry,
   isValidWidgetConfig,
   isValidWidgetEntry,
 } from './validators';
 
 import { Logger } from '@web-app-mesh/sandbox';
+import { IWidgetConfig, IWidgetEntry, Widget } from './Types';
 
-const SEPARATOR = '!';
 let widgetRegistry: IWidgetRegistry;
 
 export default class AppMesh {
 
-  private requireFunc: (...args: any) => Promise<any>;
+  public static readonly SEPARATOR = '!';
+
+  private readonly requireFunc: (...args: any) => Promise<any>;
 
   constructor(requireFunc: (...args: any) => Promise<any>) {
     this.requireFunc = requireFunc;
@@ -20,20 +24,26 @@ export default class AppMesh {
     Logger.debug('hey!');
   }
 
-  // public get widgetRegistry(): IWidgetRegistry {
-  //   return widgetRegistry;
-  // }
-  //
-  // public set widgetRegistry(x: IWidgetRegistry) {
-  //   throw Error('Can\'t touch this!');
-  // }
-
   public async preloadWidget(widgetId: string): Promise<void> {
+    const widgetAccount: undefined | IWidgetAccount = widgetRegistry[widgetId];
+    if (!widgetAccount) {
+      throw Error(`No such widget account registered: ${widgetId}`);
+    }
 
+    if (isValidNotLoadedWidgetEntry(widgetAccount)) {
+      const { url } = widgetAccount;
+
+      const incomingWidgetModule = await this.requireFunc(url);
+
+      this.digestWidget({
+        widgetId,
+        module: incomingWidgetModule,
+      });
+    }
   }
 
   public async loadWidget(widgetId: string): Promise<void> {
-
+    await this.preloadWidget(widgetId);
   }
 
   public registerWidgets(listOfWidgetEntries: IWidgetEntry[]): void {
@@ -49,7 +59,7 @@ export default class AppMesh {
       }
 
       const { name, version, url } = entry;
-      const id = ['widget', name, version].join(SEPARATOR);
+      const id = ['widget', name, version].join(AppMesh.SEPARATOR);
 
       let registration: IWidgetAccount = {
         id,
@@ -74,43 +84,35 @@ export default class AppMesh {
           config,
           hasBeenLoaded: true,
         } as ILoadedWidgetAccount;
-      }
-      else if (isValidNotLoadedWidgetEntry(entry)) {
+      } else if (isValidNotLoadedWidgetEntry(entry)) {
         registration = {
           ...registration,
           url,
         } as INotLoadedWidgetAccount;
-      }
-      else {
-        throw Error(`Invalid Widget Entry: Please choose ILoadedWidgetEntry or INonLoadedWidgetEntry. Passed: ${JSON.stringify(entry)}`);
+      } else {
+        throw Error(`Invalid Widget Entry: Please choose ILoadedWidgetEntry or
+        INonLoadedWidgetEntry. Passed: ${JSON.stringify(entry)}`);
       }
 
       widgetRegistry[id] = registration;
     }
   }
 
-  private async ensureWidgetIsLoaded(widgetId: string): Promise<void> {
+  private digestWidget({ widgetId, module }: any): void {
 
-    if (widgetRegistry.hasOwnProperty(widgetId)) {
+    const widgetAccount: IWidgetAccount = widgetRegistry[widgetId];
 
-      const widgetAccount: IWidgetAccount = widgetRegistry[widgetId];
-
-      if (widgetAccount.hasBeenLoaded) {
-        return;
-      }
-
-      // do Something with the url here - like requirejs.
-      const widgetModule: any = await new Promise((res) => {
-        this.requireFunc([widgetAccount.url as string], (someModule: any) => res(someModule));
-        res();
-      });
-
-      if (!isValidWidgetConfig(widgetModule)) {
-        throw Error(`The loaded widget ${widgetId} is not a valid module`);
-      }
-
-      widgetAccount.config = widgetModule;
+    if (!isValidWidgetConfig(module)) {
+      throw Error(`The loaded widget ${widgetId} is not a valid module`);
     }
+
+    const compatibilityIssues: CompatibilityIssue[] = getCompatibilityIssuesWithRequestedWidget(widgetId, module);
+    if (compatibilityIssues.length > 0) {
+      throw Error(`This widget module is not compatible with the requested widget ID of ${widgetId}:
+        because: ${JSON.stringify(compatibilityIssues)}`);
+    }
+
+    widgetAccount.config = module;
   }
 }
 
@@ -140,38 +142,10 @@ interface ILoadedWidgetAccount extends IWidgetAccount {
   config: IWidgetConfig;
 }
 
-type Widget = (...args: any) => any;
-
 interface IWidgetMetaData {
   wasLoadedInRuntime: boolean;
   wasPreloaded: boolean;
   loadingRum: number;
   hasBeenExecuted: boolean;
   executionAmount: number;
-}
-
-export interface IWidgetConfig {
-  id: string;
-  name: string;
-  version: string;
-  executable: Widget;
-  dependencies?: any[];
-  routes?: any;
-}
-
-export interface IWidgetEntry {
-  name: string;
-  version: string;
-  id?: string;
-  executable?: Widget;
-  url?: string;
-}
-
-export interface INotLoadedWidgetEntry {
-  url: string;
-}
-
-export interface ILoadedWidgetEntry extends IWidgetEntry {
-  executable: Widget;
-  config: IWidgetConfig;
 }

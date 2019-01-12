@@ -15,7 +15,7 @@
       false,
       "check-catch",
       "check-finally",
-      "check-else",
+      "check-else"
     ]
   },
   "rulesDirectory": [],

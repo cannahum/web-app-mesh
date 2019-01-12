@@ -1,2 +1,5 @@
-export { default as AppMesh } from './AppMesh';
+import AppMesh from './AppMesh';
+export default AppMesh;
+
 export * from './validators';
+export * from './Types';

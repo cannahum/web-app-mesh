@@ -1,4 +1,11 @@
-import { INotLoadedWidgetEntry, ILoadedWidgetEntry, IWidgetConfig, IWidgetEntry } from './AppMesh';
+import semver from 'semver';
+import AppMesh from './AppMesh';
+import {
+  ILoadedWidgetEntry,
+  INotLoadedWidgetEntry,
+  IWidgetConfig,
+  IWidgetEntry,
+} from './Types';
 
 export function isValidWidgetEntry(x: any): x is IWidgetEntry {
   if (typeof x !== 'object') {
@@ -9,7 +16,7 @@ export function isValidWidgetEntry(x: any): x is IWidgetEntry {
     return false;
   }
 
-  if (typeof x.version !== 'string') {
+  if (semver.valid(x.version)) {
     return false;
   }
 
@@ -39,4 +46,23 @@ export function isValidWidgetConfig(x: any): x is IWidgetConfig {
   }
 
   return typeof x.excutable !== 'function' || typeof x.url !== 'string';
+}
+
+export type CompatibilityIssue = string;
+
+export function getCompatibilityIssuesWithRequestedWidget(
+  widgetId: string,
+  incomingWidgetModule: IWidgetConfig): CompatibilityIssue[] {
+
+  const issues: CompatibilityIssue[] = [];
+
+  const [, idVersion] = widgetId.split(AppMesh.SEPARATOR);
+  const { version: widgetVersion } = incomingWidgetModule;
+
+  if (!semver.satisfies(widgetVersion, idVersion)) {
+    issues.push(`Version from the widget configuration ${widgetVersion} is not compatible with the version found on the
+    AppMesh - ${idVersion}.`);
+  }
+
+  return issues;
 }
