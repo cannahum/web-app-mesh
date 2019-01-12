@@ -9,7 +9,7 @@
     "build-dev": "node_modules/.bin/lerna bootstrap && npm run compile-dev",
     "compile": "node_modules/.bin/tsc -b packages/tsconfig/tsconfig.referenced.json",
     "compile-dev": "node_modules/.bin/tsc -b packages/tsconfig/tsconfig.referenced.json --watch",
-    "test": "lerna exec npm test"
+    "test": "npm run build && lerna exec npm test"
   },
   "devDependencies": {
     "@types/jest": "^23.3.12",

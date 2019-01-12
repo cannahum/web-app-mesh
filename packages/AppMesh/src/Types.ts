@@ -1,27 +1,26 @@
 export type Widget = (...args: any) => any;
 
 export interface IWidgetConfig {
-  id: string;
   name: string;
   version: string;
   executable: Widget;
-  dependencies?: any[];
+  dependencies?: IWidgetConfig[];
   routes?: any;
 }
 
 export interface IWidgetEntry {
   name: string;
   version: string;
-  id?: string;
-  executable?: Widget;
   url?: string;
+  config?: IWidgetConfig;
 }
 
-export interface INotLoadedWidgetEntry {
+export interface INotLoadedWidgetEntry extends IWidgetEntry {
   url: string;
+  config: undefined;
 }
 
 export interface ILoadedWidgetEntry extends IWidgetEntry {
-  executable: Widget;
   config: IWidgetConfig;
+  url: undefined;
 }

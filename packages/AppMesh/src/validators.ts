@@ -16,15 +16,27 @@ export function isValidWidgetEntry(x: any): x is IWidgetEntry {
     return false;
   }
 
-  if (semver.valid(x.version)) {
+  if (!semver.valid(x.version)) {
     return false;
   }
 
-  return typeof x.excutable !== 'function' || typeof x.url !== 'string';
+  // Either a loaded widget entry - the config object is available
+  // or it's a not-loaded widget entry - the url is a string.
+  if (typeof x.config !== 'object' && typeof x.url !== 'string') {
+    return false;
+  }
+
+  // But not both!
+  // Gets confusing.
+  if (typeof x.config === 'object' && typeof x.url === 'string') {
+    return false;
+  }
+
+  return true;
 }
 
 export function isValidLoadedWidgetEntry(x: any): x is ILoadedWidgetEntry {
-  return isValidWidgetEntry(x) && typeof x.executable === 'function';
+  return isValidWidgetEntry(x) && isValidWidgetConfig(x.config);
 }
 
 export function isValidNotLoadedWidgetEntry(x: any): x is INotLoadedWidgetEntry {
@@ -45,7 +57,11 @@ export function isValidWidgetConfig(x: any): x is IWidgetConfig {
     return false;
   }
 
-  return typeof x.excutable !== 'function' || typeof x.url !== 'string';
+  if (typeof x.executable !== 'function') {
+    return false;
+  }
+
+  return true;
 }
 
 export type CompatibilityIssue = string;

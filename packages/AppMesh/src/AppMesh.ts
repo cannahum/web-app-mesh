@@ -10,43 +10,21 @@ import {
 import { Logger } from '@web-app-mesh/sandbox';
 import { IWidgetConfig, IWidgetEntry, Widget } from './Types';
 
-let widgetRegistry: IWidgetRegistry;
-
 export default class AppMesh {
-
   public static readonly SEPARATOR = '!';
-
+  private readonly widgetRegistry: IWidgetRegistry = {};
   private readonly requireFunc: (...args: any) => Promise<any>;
 
   constructor(requireFunc: (...args: any) => Promise<any>) {
+    if (!requireFunc && typeof requireFunc !== 'function') {
+      throw Error('You need to supply a require function (e.g. requirejs or SystemJS)');
+    }
     this.requireFunc = requireFunc;
-    widgetRegistry = {};
-    Logger.debug('hey!');
   }
 
-  public async preloadWidget(widgetId: string): Promise<void> {
-    const widgetAccount: undefined | IWidgetAccount = widgetRegistry[widgetId];
-    if (!widgetAccount) {
-      throw Error(`No such widget account registered: ${widgetId}`);
-    }
+  public addWidgets(listOfWidgetEntries: IWidgetEntry[]): void {
 
-    if (isValidNotLoadedWidgetEntry(widgetAccount)) {
-      const { url } = widgetAccount;
-
-      const incomingWidgetModule = await this.requireFunc(url);
-
-      this.digestWidget({
-        widgetId,
-        module: incomingWidgetModule,
-      });
-    }
-  }
-
-  public async loadWidget(widgetId: string): Promise<void> {
-    await this.preloadWidget(widgetId);
-  }
-
-  public registerWidgets(listOfWidgetEntries: IWidgetEntry[]): void {
+    const registrations: IWidgetRegistry = {};
 
     if (!Array.isArray(listOfWidgetEntries)) {
       throw Error('listOfWidgetEntries must be an array!');
@@ -76,7 +54,8 @@ export default class AppMesh {
       };
 
       if (isValidLoadedWidgetEntry(entry)) {
-        const { executable, config } = entry;
+        const { config } = entry;
+        const { executable } = config;
 
         registration = {
           ...registration,
@@ -94,13 +73,39 @@ export default class AppMesh {
         INonLoadedWidgetEntry. Passed: ${JSON.stringify(entry)}`);
       }
 
-      widgetRegistry[id] = registration;
+      registrations[id] = registration;
     }
+
+    for (const [key, value] of Object.entries(registrations)) {
+      this.widgetRegistry[key] = value;
+    }
+  }
+
+  public async preloadWidget(widgetId: string): Promise<void> {
+    const widgetAccount: undefined | IWidgetAccount = this.widgetRegistry[widgetId];
+    if (!widgetAccount) {
+      throw Error(`No such widget account registered: ${widgetId}`);
+    }
+
+    if (isValidNotLoadedWidgetEntry(widgetAccount)) {
+      const { url } = widgetAccount;
+
+      const incomingWidgetModule = await this.requireFunc(url);
+
+      this.digestWidget({
+        widgetId,
+        module: incomingWidgetModule,
+      });
+    }
+  }
+
+  public async loadWidget(widgetId: string): Promise<void> {
+    await this.preloadWidget(widgetId);
   }
 
   private digestWidget({ widgetId, module }: any): void {
 
-    const widgetAccount: IWidgetAccount = widgetRegistry[widgetId];
+    const widgetAccount: IWidgetAccount = this.widgetRegistry[widgetId];
 
     if (!isValidWidgetConfig(module)) {
       throw Error(`The loaded widget ${widgetId} is not a valid module`);
@@ -113,6 +118,13 @@ export default class AppMesh {
     }
 
     widgetAccount.config = module;
+  }
+
+  private getWidgetRegistry(): IWidgetRegistry {
+    if (process.env.NODE_ENV === 'test') {
+      return this.widgetRegistry;
+    }
+    throw Error(`ACCESS DENIED. Only during tests can you access this field`);
   }
 }
 
