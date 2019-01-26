@@ -9,9 +9,11 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/semver": "^5.5.0",
     "typescript": "^3.2.2"
   },
   "dependencies": {
-    "@web-app-mesh/sandbox": "^1.0.0"
+    "@web-app-mesh/sandbox": "^1.0.0",
+    "semver": "^5.6.0"
   }
 }

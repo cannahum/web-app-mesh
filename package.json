@@ -12,15 +12,11 @@
     "test": "npm run build && lerna exec npm test"
   },
   "devDependencies": {
-    "@types/jest": "^23.3.12",
-    "@types/semver": "^5.5.0",
     "editorconfig": "^0.15.2",
     "jest": "^23.6.0",
     "lerna": "^3.10.5",
     "tslint": "^5.11.0",
     "typescript": "^3.2.1"
   },
-  "dependencies": {
-    "semver": "^5.6.0"
-  }
+  "dependencies": {}
 }
