@@ -76,7 +76,7 @@ export default class AppMesh {
       registrations[id] = registration;
     }
 
-    for (const [key, value] of Object.entries(registrations)) {
+    for (const [key, value] of Object.entries<IWidgetAccount>(registrations)) {
       this.widgetRegistry[key] = value;
     }
   }
@@ -138,7 +138,6 @@ interface IWidgetAccount {
   version: string;
   hasBeenLoaded: boolean;
   url?: string;
-  executable?: Widget;
   config?: IWidgetConfig;
   metaData: IWidgetMetaData;
 }
